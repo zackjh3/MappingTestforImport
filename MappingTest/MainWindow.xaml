@@ -1,0 +1,83 @@
+﻿<Window x:Class="MappingTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MappingTest"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="400" Width="1000" Loaded="MappingWindowLoaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="271.861"/>
+            <ColumnDefinition Width="128.139"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="Select Model" Grid.Column="0" Grid.Row ="0" Grid.RowSpan="2" Grid.ColumnSpan="2">
+            <ListBox x:Name="Selected_Models" Margin="5,10,5,0" SelectionChanged="Selected_Models_SelectionChanged"/>
+        </GroupBox>
+        <GroupBox Header="Import Settings" Grid.Column="2" Grid.RowSpan="2">
+            <Grid>
+                <StackPanel>
+                    <GroupBox Header="Selected Model" Margin="0,10,0,0">
+                        <TextBox Name="SelectedModel" Margin="0,10,0,0" Text="{Binding SelectedItem, ElementName=Selected_Models}"/>
+                    </GroupBox>
+                    <GroupBox Header="Import Type">
+                        <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                            <RadioButton Name="Replace" Content="Replace" IsChecked="True">
+                            </RadioButton>
+                            <RadioButton Name="Append" Content="Append">
+                            </RadioButton>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header ="Source Spreadsheet" Margin="0,10,0,0">
+                        <ComboBox Name="cbSourceSheet" Margin="0,10,0,1" SelectionChanged="cbSourceSheet_SelectionChanged" IsEnabled="False"/>
+                    </GroupBox>
+                    <GroupBox Header="Reference Selection" Margin="0,10,0,10">
+                        <ComboBox Name="cbReferences" Margin="0,10,0,0"/>
+                    </GroupBox>
+                    <Button Content="Next" x:Name="CompMapping" Height="25" Width="50" Click="CompMapping_Click"/>
+                    <Button Content="Import" x:Name="Import" Height="25" Width="50" Margin="20" Click="Import_Click"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <DataGrid x:Name="VarMapping" Grid.Column="3" Grid.RowSpan="2" Grid.ColumnSpan="2" Width ="600" Margin ="0,10,-533,0" 
+                  CanUserResizeColumns="True" 
+                  AutoGenerateColumns="False" 
+                  HorizontalAlignment="Left" 
+                  CanUserAddRows="False"
+                  ItemsSource="{Binding VarDataGridItems, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Window}}">
+            <DataGrid.Columns>
+                <DataGridTextColumn  Header="RIPL Model Column"  Binding="{Binding VarName}" Width="120" IsReadOnly="True" />
+                <DataGridTextColumn  Header="Variable Type" Binding="{Binding VarType}" IsReadOnly="False"/>
+                <DataGridTemplateColumn  Header="Excel Source Field">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox  SelectedItem="{Binding SelectedItem, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding ExcelVar,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
+                              
+                                    />
+
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Values Mapping Option" Binding="{Binding TransformCol}" IsReadOnly="True" Width="*"/>
+                <DataGridTemplateColumn Header="Attribute Mapping">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Map?" x:Name="AttMapp" Click="AttMapp_Click" IsEnabled="True" Width="50"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn x:Name="Testing" Header="TEST" Binding="{Binding VarID}">
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

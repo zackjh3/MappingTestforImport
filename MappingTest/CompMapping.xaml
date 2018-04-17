@@ -1,0 +1,41 @@
+﻿<Window x:Class="MappingTest.CompMapping"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MappingTest"
+        mc:Ignorable="d"
+        Title="CompMapping" Height="300" Width="300" Loaded="Window_Loaded">
+    <Grid>
+        <StackPanel>
+        <DataGrid x:Name="ComponentMapping"
+                  CanUserResizeColumns="True" 
+                  AutoGenerateColumns="False" 
+                  HorizontalAlignment="Left" 
+                  CanUserAddRows="False"
+                  ItemsSource="{Binding lstXcelComps, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Window}}">
+            <DataGrid.Columns>
+                <DataGridTextColumn  Header="Excel Component List"  Binding="{Binding ExcelComp}" Width="120" IsReadOnly="True" />
+               
+                <DataGridTemplateColumn  Header="RIPL Comps">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox  SelectedItem="{Binding SelectedComp, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding lstComps,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
+                                       DisplayMemberPath="{Binding RIPLCompName}"
+                              
+                                    />
+
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!--<DataGridTextColumn Header="Values Mapping Option" Binding="{Binding TransformCol}" IsReadOnly="True" Width="*"/>
+              
+                <DataGridTextColumn x:Name="Testing" Header="TEST" Binding="{Binding VarID}">
+                </DataGridTextColumn>-->
+            </DataGrid.Columns>
+        </DataGrid>
+            <Button Width="100" Height="25" HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Ok" x:Name="CompsOK" Click="CompsOK_Click" Margin="10,10,10,10"/>
+        </StackPanel>
+    </Grid>
+</Window>
