@@ -357,32 +357,32 @@ namespace MappingTest
 
         private void CompMapping_Click(object sender, RoutedEventArgs e)
         {
-                foreach (RIPLVariables vari in VarMapping.Items)
-                {
+                //foreach (RIPLVariables vari in VarMapping.Items)
+                //{
                     
-                    string y="";
+                //    string y="";
                    
-                    var selecteditem = vari.SelectedItem;//here you have selected item
-                    var RIPLVar = vari.VarName;
-                if (selecteditem != null)
-                {
-                    IEnumerable<ExcelVariables> q1 = from ExcelVar in ExcelVar
-                                                     where ExcelVar.XcelVar == selecteditem.ToString()
-                                                     select ExcelVar;
-                    foreach (ExcelVariables ma in q1)
-                    {
-                        y = Convert.ToString(ma.XcelVar);
-                    }
-                    VMapList.Add(new VarMapList()
-                    {
-                        RIPLVarID = Convert.ToInt32(vari.VarID),
-                        ExcelVarString = y
+                //    var selecteditem = vari.SelectedItem;//here you have selected item
+                //    var RIPLVar = vari.VarName;
+                //if (selecteditem != null)
+                //{
+                //    IEnumerable<ExcelVariables> q1 = from ExcelVar in ExcelVar
+                //                                     where ExcelVar.XcelVar == selecteditem.ToString()
+                //                                     select ExcelVar;
+                //    foreach (ExcelVariables ma in q1)
+                //    {
+                //        y = Convert.ToString(ma.XcelVar);
+                //    }
+                //    VMapList.Add(new VarMapList()
+                //    {
+                //        RIPLVarID = Convert.ToInt32(vari.VarID),
+                //        ExcelVarString = y
 
-                    });
-                }
+                //    });
+                //}
                
                
-                }
+                //}
 
        
 
@@ -475,6 +475,31 @@ namespace MappingTest
 
         private void Import_Click(object sender, RoutedEventArgs e)
         {
+            foreach (RIPLVariables vari in VarMapping.Items)
+            {
+                string y = "";
+                var selecteditem = vari.SelectedItem;//here you have selected item
+                var RIPLVar = vari.VarName;
+                if (selecteditem != null)
+                {
+                    IEnumerable<ExcelVariables> q1 = from ExcelVar in ExcelVar
+                                                     where ExcelVar.XcelVar == selecteditem.ToString()
+                                                     select ExcelVar;
+                    foreach (ExcelVariables ma in q1)
+                    {
+                        y = Convert.ToString(ma.XcelVar);
+                    }
+                    VMapList.Add(new VarMapList()
+                    {
+                        RIPLVarID = Convert.ToInt32(vari.VarID),
+                        ExcelVarString = y
+
+                    });
+                }
+
+
+            }
+
             string connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + selectedFile + ";Extended Properties=Excel 12.0;");
             string tempTable = "AImportTempTable";
             string fileType = ".xlsx";
@@ -487,13 +512,30 @@ namespace MappingTest
                 using (SqlCommand cmd = connection.CreateCommand())
                 {
                     connection.Open();
-                    foreach (var item in passList)
+                    foreach (var item in VMapList)
                     {
-                        string sqlString = String.Format("UPDATE AImportTempTable SET [HCA Type]={0} WHERE [HCA Type]='{1}'", item.attID, item.attString);
-                        cmd.CommandText = sqlString;
+                        if (passList != null)
+                        {
+                            foreach (var item2 in passList)
+                            {
+                                string sqlString = String.Format("UPDATE AImportTempTable SET [{2}]={0} WHERE [{2}]='{1}'", item2.attID, item2.attString, item.ExcelVarString);
+                                cmd.CommandText = sqlString;
+                                cmd.ExecuteNonQuery();
+                            }
+                            
+                        }
+                        string sqlcmd = String.Format("EXEC sp_RENAME 'AImportTempTable.{0}', 'var{1}', 'COLUMN'", item.ExcelVarString, item.RIPLVarID);
+                        cmd.CommandText = sqlcmd;
                         cmd.ExecuteNonQuery();
-      
                     }
+
+                    //foreach (var item2 in passList)
+                    //{
+                    //    string sqlString = String.Format("UPDATE AImportTempTable SET [HCA Type]={0} WHERE [HCA Type]='{1}'", item2.attID, item2.attString);
+                    //    cmd.CommandText = sqlString;
+                    //    cmd.ExecuteNonQuery();
+                    //}
+
                     foreach (var item in lstCompMapping)
                     {
                         string sqlString2 = String.Format("UPDATE AImportTempTable SET [Component] = {0} WHERE [Component]='{1}'", item.compMapID, item.compString);
