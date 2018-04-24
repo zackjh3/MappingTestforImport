@@ -26,45 +26,47 @@ using System.Reflection;
 
 namespace MappingTest.Other_Classes
 {
-    public class Reference
+    public class Reference : PropertyChangedBase
     {
         [Mapping(ColumnName = "Reference Name")]
-        public string Ref_Name { get; set; }
+        private string _refname;
+        public string Ref_Name
+        {
+            get { return _refname; }
+            set
+            {
+                _refname = value;
+                RaisePropertyChanged("RefName");
+            }
+        }
         [Mapping(ColumnName = "Reference ID")]
-        public int Ref_ID { get; set; }
+        private int _refID;
+        public int Ref_ID
+        {
+            get { return _refID; }
+            set
+            {
+                _refID = value;
+                RaisePropertyChanged("Ref_ID");
+            }
+        }
+        private string _selectedref;
+        public string SelectedRef
+        {
+            get { return _selectedref; }
+            set
+            {
+                _selectedref = value;
+                RaisePropertyChanged("SelectedRef");
+            }
+        }
+
 
         //public Reference(string RefName, int Ref_ID)
         //{
         //    this.Ref_Name = Ref_Name;
         //    this.Ref_ID = Ref_ID;
         //}
-        public static List<Reference> GetReferences()
-        {
-            List<Reference> refs = new List<Reference>();
-            try
-            {
-                using (SqlCommand cmd = MyGlobalClass.OpenConnection())
-                {
-                    cmd.CommandText = "SELECT [Ref_Name],[Ref_ID] FROM [Import_78].[dbo].[Ref_Def]";
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Reference item = new Reference();
-                            item.Ref_Name = reader["Ref_Name"].ToString();
-                            item.Ref_ID = Convert.ToInt32(reader["Ref_ID"]);
 
-                            refs.Add(item);
-                        }
-                    }
-                }
-                return refs;
-
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
     }
 }

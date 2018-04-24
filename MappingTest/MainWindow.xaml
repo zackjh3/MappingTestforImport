@@ -39,7 +39,7 @@
                         <ComboBox Name="cbSourceSheet" Margin="0,10,0,1" SelectionChanged="cbSourceSheet_SelectionChanged" IsEnabled="False"/>
                     </GroupBox>
                     <GroupBox Header="Reference Selection" Margin="0,10,0,10">
-                        <ComboBox Name="cbReferences" Margin="0,10,0,0"/>
+                        <ComboBox Name="cbReferences" Margin="0,10,0,1" SelectionChanged="cbReferences_SelectionChanged"/>
                     </GroupBox>
                     <Button Content="Next" x:Name="CompMapping" Height="25" Width="50" Click="CompMapping_Click"/>
                     <Button Content="Import" x:Name="Import" Height="25" Width="50" Margin="20" Click="Import_Click"/>

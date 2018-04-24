@@ -10,6 +10,7 @@ namespace MappingTest.Other_Classes
     {
         public string attString { get; set; }
         public int attID { get; set; }
+        public int VarID { get; set; }
     }
 
 }

@@ -167,21 +167,25 @@ namespace MappingTest
 
                 foreach (ExcelComps comps in ComponentMapping.Items)
                 {
-                    int x = 0;
-                    var selectedcomp = comps.SelectedComp;//here you have selected item
-                    var excelComp = comps.ExcelComp;
-                    IEnumerable<RIPLComps> q1 = from lstComps in lstComps
-                                                where lstComps.RIPLCompName == selectedcomp.ToString()
-                                               select lstComps;
-                    foreach (RIPLComps ma in q1)
+                    if (comps != null)
                     {
-                        x = Convert.ToInt32(ma.CompID);
+                        int x = 0;
+                        var selectedcomp = comps.SelectedComp;//here you have selected item
+                        var excelComp = comps.ExcelComp;
+                        IEnumerable<RIPLComps> q1 = from lstComps in lstComps
+                                                    where lstComps.RIPLCompName == selectedcomp.ToString()
+                                                    select lstComps;
+                        foreach (RIPLComps ma in q1)
+                        {
+                            x = Convert.ToInt32(ma.CompID);
+                        }
+                        origWindow.lstCompMapping.Add(new ComponentMappingClass()
+                        {
+                            compString = excelComp.ToString(),
+                            compMapID = x
+                        });
                     }
-                    origWindow.lstCompMapping.Add(new ComponentMappingClass()
-                    {
-                        compString = excelComp.ToString(),
-                        compMapID = x
-                    });
+                   
                 }
                 
                 this.Close();

@@ -40,8 +40,9 @@ namespace MappingTest
     
     public partial class MainWindow : Window
     {
-        public string HELP;
+        public static int refnum;
         public static string selectedSheet = "";
+        public static string SelReference = "";
         public static string ExcelMappedVar = "";
         public static string RIPLMappedVar = "";
         public List<RIPLVariables> VarDataGridItems { get; set; }
@@ -52,7 +53,8 @@ namespace MappingTest
         public static ObservableCollection<SourceColumns> SourceCol { get; set; }
         public static string selectedFile = "C:\\Users\\zach.hine\\American Innovations\\Import\\TestData.xlsx";
         private string transform = string.Empty;
-        
+        public List<Reference> newref { get; set; }
+        public int model_ID = 0;
         public List<AttMapList> passList = new List<AttMapList>();
         public List<ComponentMappingClass> lstCompMapping = new List<ComponentMappingClass>();
         public static List<VarMapList> VMapList = new List<VarMapList>();
@@ -60,20 +62,21 @@ namespace MappingTest
         public MainWindow()
         {
             InitializeComponent();
-            HELP = "HELP";
+     
         }
         public void MappingWindowLoaded(object sender, RoutedEventArgs e)
         {
 
+            
             //string selectedFile = "C:\\Users\\zach.hine\\American Innovations\\Import\\TestData.xlsx";
             //string selectedFile = ((MainWindow)Application.Current.MainWindow).filePath.Text;
             var results = GetAllWorksheets(selectedFile);
 
-            Selected_Models.Items.Add("Haz Liq - High Consequence Areas");
+            Selected_Models.Items.Add("Pipe - Pipe Design");
             string connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + selectedFile + ";Extended Properties=Excel 12.0;");
-            BuildReferenceList();
+            
             List<string> inputList = new List<string>();
-
+            BuildReferenceList();
 
 
             // string selectedFile = ((MainWindow)Application.Current.MainWindow).filePath.Text;
@@ -144,7 +147,7 @@ namespace MappingTest
         public void Selected_Models_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             cbSourceSheet.IsEnabled = true;
-            int model_ID;
+            
             string selModel = Selected_Models.SelectedItem.ToString();
             using (SqlConnection connection = new SqlConnection(MyGlobalClass.Sql()))
             {
@@ -212,7 +215,7 @@ namespace MappingTest
             cbReferences.Items.Clear();
             try
             {
-                List<Reference> refs = Reference.GetReferences();
+                List<Reference> refs = GetReferences();
                 #region Add Feature Classes to combobox
                 int idx = 0;
                 cbReferences.Items.Add("");
@@ -231,9 +234,36 @@ namespace MappingTest
                 throw e;
             }
 
-
         }
-        private void cbSourceSheet_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public List<Reference> GetReferences()
+        {
+            List<Reference> refs = new List<Reference>();
+            try
+            {
+                using (SqlCommand cmd = MyGlobalClass.OpenConnection())
+                {
+                    cmd.CommandText = "SELECT [Ref_Name],[Ref_ID] FROM [Import_78].[dbo].[Ref_Def]";
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Reference item = new Reference();
+                            item.Ref_Name = reader["Ref_Name"].ToString();
+                            item.Ref_ID = Convert.ToInt32(reader["Ref_ID"]);
+
+                            refs.Add(item);
+                        }
+                    }
+                }
+                return refs;
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void cbSourceSheet_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
             var SourceSheet = sender as ComboBox;
@@ -282,7 +312,6 @@ namespace MappingTest
             ExcelVar = ExcelVariables.GetColumns(selectedFile, selectedSheet);
 
         }
-        
         public List<RIPLVariables> GetVariables(string model)
         {
             List<RIPLVariables> lstVariables = new List<RIPLVariables>();
@@ -312,7 +341,6 @@ namespace MappingTest
                 throw e;
             }
         }
-        
         private void AttMapp_Click(object sender, RoutedEventArgs e)
         {
             
@@ -342,7 +370,6 @@ namespace MappingTest
             }
             return list;
         }
-
         private int FindRowIndex(DataGridRow row)
         {
             DataGrid dataGrid =
@@ -354,125 +381,11 @@ namespace MappingTest
 
             return index;
         }
-
         private void CompMapping_Click(object sender, RoutedEventArgs e)
         {
-                //foreach (RIPLVariables vari in VarMapping.Items)
-                //{
-                    
-                //    string y="";
-                   
-                //    var selecteditem = vari.SelectedItem;//here you have selected item
-                //    var RIPLVar = vari.VarName;
-                //if (selecteditem != null)
-                //{
-                //    IEnumerable<ExcelVariables> q1 = from ExcelVar in ExcelVar
-                //                                     where ExcelVar.XcelVar == selecteditem.ToString()
-                //                                     select ExcelVar;
-                //    foreach (ExcelVariables ma in q1)
-                //    {
-                //        y = Convert.ToString(ma.XcelVar);
-                //    }
-                //    VMapList.Add(new VarMapList()
-                //    {
-                //        RIPLVarID = Convert.ToInt32(vari.VarID),
-                //        ExcelVarString = y
-
-                //    });
-                //}
-               
-               
-                //}
-
-       
-
             CompMapping CompMappingWindow = new CompMapping(this);
             CompMappingWindow.Show();
-            MessageBox.Show(lstCompMapping.Count.ToString());
         }
-
-        //public static void ImportTableToSQLServer(string connStrSource, string sourceTable, string connStrDestination)
-        //{
-        //    //Create temp table for data
-        //    string tempTable = "ImportTempTable";
-        //    // Create database connections
-        //    //string connStrSource = "Data Source= Import78
-        //    SqlConnection sqlConnDestination = new SqlConnection(MyGlobalClass.Sql());
-
-        //    if (sqlConnDestination.State == System.Data.ConnectionState.Broken
-        //      || sqlConnDestination.State == System.Data.ConnectionState.Closed)
-        //    { sqlConnDestination.Open(); }
-
-        //    // Create the destination database object
-        //    ServerConnection connDestination = new ServerConnection(sqlConnDestination);
-        //    Server server = new Server(connDestination);
-        //    Database destinationDB = server.Databases[sqlConnDestination.Database];
-
-        //    Microsoft.SqlServer.Management.Smo.Table copiedtable = null;
-        //    DocumentFormat.OpenXml.Spreadsheet.Table sTable = ;
-        //    if (sTable != null)
-        //    {
-        //        copiedtable = new Microsoft.SqlServer.Management.Smo.Table(destinationDB, tempTable, sTable.Schema);
-
-        //        // Create the new destination table
-        //        CreateColumnsFromExceltable(ref sTable, ref copiedtable);
-        //        copiedtable.AnsiNullsStatus = sTable.AnsiNullsStatus;
-        //        copiedtable.QuotedIdentifierStatus = sTable.QuotedIdentifierStatus;
-        //        copiedtable.TextFileGroup = sTable.TextFileGroup;
-        //        copiedtable.FileGroup = sTable.FileGroup;
-        //        copiedtable.Create();
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
-      //  private static void CreateColumnsFromExceltable(ref Microsoft.SqlServer.Management.Smo.Table sourceTable, ref Microsoft.SqlServer.Management.Smo.Table copiedTable)
-      //  {
-
-      //      try
-      //      {
-      //          // Create a source SQL Server object
-      //          var serverSource = sourceTable.Parent.Parent;
-      //          var serverDestination = copiedTable.Parent.Parent;
-
-      //          // Re-create each source table column in the new destination table
-      //          foreach (DocumentFormat.OpenXml.SpreadsheetColumn source in sourceTable.Columns)
-      //          {
-      //              var column = new Column(copiedTable, source.Name, source.DataType);
-      //              column.Collation = source.Collation;
-      //              column.Nullable = source.Nullable;
-      //              column.Computed = source.Computed;
-      //              column.ComputedText = source.ComputedText;
-      //              column.Default = source.Default;
-
-      //              if (source.DefaultConstraint != null)
-      //              {
-      //                  column.AddDefaultConstraint(copiedTable.Name + SEPERATOR + source.DefaultConstraint.Name);
-      //                  column.DefaultConstraint.Text = source.DefaultConstraint.Text;
-      //              }
-
-      //              column.IsPersisted = source.IsPersisted;
-      //              column.DefaultSchema = source.DefaultSchema;
-      //              column.RowGuidCol = source.RowGuidCol;
-
-      //              if (serverSource.VersionMajor >= 10 && serverDestination.VersionMajor >= 10)
-      //              {
-      //                  column.IsFileStream = source.IsFileStream;
-      //                  column.IsSparse = source.IsSparse;
-      //                  column.IsColumnSet = source.IsColumnSet;
-      //              }
-
-      //              copiedTable.Columns.Add(column);
-      //          }
-      //      }
-      //      catch (Exception e)
-      //      {
-      //          Logger.LogError("CreateColumnsFromSQLtable()", e);
-      //          throw;
-      //      }
-      //  }
-
         private void Import_Click(object sender, RoutedEventArgs e)
         {
             foreach (RIPLVariables vari in VarMapping.Items)
@@ -500,65 +413,134 @@ namespace MappingTest
 
             }
 
+            string text = String.Join(",", VMapList.Select(z => z.ExcelVarString));
+            string[] VarArray = new string[] { };
+            string[] VarStatArray = new string[] { };
+            VarArray = VMapList.Where(z=> z.RIPLVarID>24).Select(x => "var" + x.RIPLVarID.ToString()).ToArray();
+            VarStatArray = VMapList.Where(z => z.RIPLVarID < 24).Select(x => "var" + x.RIPLVarID.ToString()).ToArray();
+            string varlist = "";
+            varlist = String.Join(",", VarArray);
+            string statlist = "";
+            statlist = String.Join(",", VarStatArray);
+
+            MessageBox.Show(varlist,text);
+            ImportClickMethod(VMapList);
+            
+
+            if (Replace.IsChecked == true)
+            {
+                ReplaceImportRecords(varlist, statlist);
+            }
+            else if (Append.IsChecked == true)
+            {
+
+            }
+        }
+   
+        private void ImportClickMethod(List<VarMapList> VMapList)
+        {
+           
+
             string connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + selectedFile + ";Extended Properties=Excel 12.0;");
             string tempTable = "AImportTempTable";
             string fileType = ".xlsx";
             selectedSheet = cbSourceSheet.SelectedItem as string;
-            
-            ImportTableFromFile(fileType, connectionString, selectedSheet, MyGlobalClass.Sql(), tempTable);
 
-            using (SqlConnection connection = new SqlConnection(MyGlobalClass.Sql()))
+            ImportTableFromFile(fileType, connectionString, selectedSheet, MyGlobalClass.Sql(), tempTable);
+            try
             {
-                using (SqlCommand cmd = connection.CreateCommand())
+                using (SqlConnection connection = new SqlConnection(MyGlobalClass.Sql()))
                 {
-                    connection.Open();
-                    foreach (var item in VMapList)
+                    using (SqlCommand cmd = connection.CreateCommand())
                     {
-                        if (passList != null)
+                        connection.Open();
+                        foreach (var item in VMapList)
                         {
                             foreach (var item2 in passList)
                             {
-                                string sqlString = String.Format("UPDATE AImportTempTable SET [{2}]={0} WHERE [{2}]='{1}'", item2.attID, item2.attString, item.ExcelVarString);
-                                cmd.CommandText = sqlString;
-                                cmd.ExecuteNonQuery();
+                                if (item.RIPLVarID == item2.VarID)
+                                {
+                                    string sqlString = String.Format("UPDATE AImportTempTable SET [{2}]={0} WHERE [{2}]='{1}'", item2.attID, item2.attString, item.ExcelVarString);
+                                    cmd.CommandText = sqlString;
+                                    cmd.ExecuteNonQuery();
+                                }
+
                             }
-                            
+                            string sqlcmd = String.Format("EXEC sp_RENAME 'AImportTempTable.{0}', 'var{1}', 'COLUMN'", item.ExcelVarString, item.RIPLVarID);
+                            cmd.CommandText = sqlcmd;
+                            cmd.ExecuteNonQuery();
                         }
-                        string sqlcmd = String.Format("EXEC sp_RENAME 'AImportTempTable.{0}', 'var{1}', 'COLUMN'", item.ExcelVarString, item.RIPLVarID);
-                        cmd.CommandText = sqlcmd;
-                        cmd.ExecuteNonQuery();
-                    }
 
-                    //foreach (var item2 in passList)
-                    //{
-                    //    string sqlString = String.Format("UPDATE AImportTempTable SET [HCA Type]={0} WHERE [HCA Type]='{1}'", item2.attID, item2.attString);
-                    //    cmd.CommandText = sqlString;
-                    //    cmd.ExecuteNonQuery();
-                    //}
-
-                    foreach (var item in lstCompMapping)
-                    {
-                        string sqlString2 = String.Format("UPDATE AImportTempTable SET [Component] = {0} WHERE [Component]='{1}'", item.compMapID, item.compString);
-                        cmd.CommandText = sqlString2;
-                        cmd.ExecuteNonQuery();
+                        foreach (var item in lstCompMapping)
+                        {
+                            string sqlString2 = String.Format("UPDATE AImportTempTable SET [Component] = {0} WHERE [Component]='{1}'", item.compMapID, item.compString);
+                            cmd.CommandText = sqlString2;
+                            cmd.ExecuteNonQuery();
+                        }
+                        connection.Close();
+                        MessageBox.Show("Import Complete");
                     }
-                    connection.Close();
-                    MessageBox.Show("Import Complete");
                 }
-             
-               
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+     
+        }
+
+        private void ReplaceImportRecords(string varlist, string statlist)
+        {
+            
+            string Mtbl = GetModelTableName(model_ID,1);
+            string Rtble = GetRefTableName(model_ID, refnum, 1);
+            string complist = "";
+            complist = string.Join(",", lstCompMapping.Select(x => x.compMapID));
+            
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(MyGlobalClass.Sql()))
+                {
+                    using (SqlCommand cmd = connection.CreateCommand())
+                    {
+                        connection.Open();
+                        string cmdtext = String.Format("DELETE FROM dbo.{0} WHERE Component IN ({1})", Mtbl, complist);
+                        cmd.CommandText = cmdtext;
+                        cmd.ExecuteNonQuery();
+                        string cmdtext2 = String.Format("INSERT INTO dbo.{0} (Component,{1}) SELECT Component,{1} FROM [AImportTempTable] " +
+                            "WHERE Component IS NOT NULL ", Mtbl, varlist);
+                        cmd.CommandText = cmdtext2;
+                        cmd.ExecuteNonQuery();
+                        string cmdtext3 = String.Format("INSERT INTO dbo.{0} ({1}) SELECT {1} FROM [AImportTempTable] " +
+                            "WHERE Component IS NOT NULL ", Rtble, statlist);
+                        cmd.CommandText = cmdtext3;
+                        cmd.ExecuteNonQuery();
+                        connection.Close();
+                    }
+                }
+                MessageBox.Show("Insert Complete");
+            }
+            catch(Exception e)
+            {
+                throw e;
             }
 
         }
-   
+        public string GetRefTableName(int ModelID, int RefID, int MType)
+        {
+            string Rtbl = String.Format("m{0}_{1}_{2}", ModelID, MType, RefID);
+            MessageBox.Show(Rtbl);
+            return Rtbl;
+        }
+        public string GetModelTableName(int ModelID, int MType)
+        {
 
-
-
-
-
-
-
-
+            string Mtbl = String.Format("m{0}_{1}",ModelID,MType);
+            MessageBox.Show(Mtbl);
+            return Mtbl;
+        }
         /// <summary>
         /// Imports a table of data from a file
         /// </summary>
@@ -787,7 +769,7 @@ namespace MappingTest
             }
             catch (Exception e)
             {
-                
+                throw e;
             }
         }
         private static string GetColumnNamesFromTable(ref Microsoft.SqlServer.Management.Smo.Table destinationTable, ref SqlBulkCopy bcp)
@@ -822,7 +804,19 @@ namespace MappingTest
             return colNames;
         }
 
-
+        private void cbReferences_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var cbRef = sender as ComboBox;
+            string x = cbRef.SelectedItem as string;
+            List<Reference> refnew = new List<Reference>();
+            refnew = GetReferences();
+            Reference result = refnew.Find(y => y.Ref_Name == x);
+            if(result != null)
+            {
+                refnum = result.Ref_ID;
+            }
+            
+        }
     }
 }
     

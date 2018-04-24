@@ -26,6 +26,7 @@ using System.Configuration;
 using System.Reflection;
 using MappingTest.Other_Classes;
 using MappingTest;
+using MappingTest.RIPL_Classes;
 
 namespace MappingTest
 {
@@ -37,7 +38,8 @@ namespace MappingTest
         public List<MyModel> MyDataGridItems { get; set; }
         public List<ModelAtt> SQLAtt { get; set; }
         public DataTable myAtts { get; set; }
-        public string selsheet = "HCA";
+        public string selsheet = "Pipe Segment";
+        public int v = 0;
         MainWindow originalWindow;
 
         public AttMapping(MainWindow incomingWindow)
@@ -55,10 +57,19 @@ namespace MappingTest
             {
                 MyDataGridItems.Add(new MyModel() { XcelAtt = item[0].ToString() });
             }
-           
-            AttMap.ItemsSource = MyDataGridItems;
+            IEnumerable<RIPLVariables> result = from s in originalWindow.VarDataGridItems
+                                                where s.VarName == MainWindow.ExcelMappedVar
+                                                select s;
+         
+            foreach (RIPLVariables rv in result)
+            {
+                v = Convert.ToInt32(rv.VarID);
+            }
             
-          
+            
+           // originalWindow.VarDataGridItems.Where(z => z.VarName == MainWindow.ExcelMappedVar).Select(x => x.VarID));
+           // MessageBox.Show(hi.ToString());
+            
          
         }
         public string Sql()
@@ -130,6 +141,7 @@ namespace MappingTest
         }
         public void OK_Click(object sender, RoutedEventArgs e)
         {
+            
             try
             {
 
@@ -148,10 +160,13 @@ namespace MappingTest
                     originalWindow.passList.Add(new AttMapList()
                     {
                         attString = excelAtt.ToString(),
-                        attID = x
+                        attID = x,
+                        VarID = v
+
                     });
                  
                 }
+               
                 
                 //mappingWin.PassList(this.passList);
                 this.Close();
@@ -210,13 +225,10 @@ namespace MappingTest
                 cmd.Connection = conn;
 
                 cmd.CommandText = String.Format("SELECT DISTINCT ["+ MainWindow.ExcelMappedVar+"] FROM [" + selsheet +"$" + "] WHERE [" + MainWindow.ExcelMappedVar + "] IS NOT NULL");
-
-
-
-
-
                 OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 da.Fill(dt);
+
+                cmd.CommandText = String.Format("SELECT [VarID_]WHERE [" + MainWindow.ExcelMappedVar + "] IS NOT NULL");
             }
 
             return dt;
