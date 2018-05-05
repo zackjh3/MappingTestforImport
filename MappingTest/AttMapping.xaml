@@ -11,14 +11,17 @@
             <DataGrid x:Name="AttMap" AutoGenerateColumns="False" CanUserAddRows="False"
                   ItemsSource="{Binding MyDataGridItems,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Window}}">
                 <DataGrid.Columns >
-                    <DataGridTextColumn Header="Database Attributes" x:Name="txtAtt"  
+                    <DataGridTextColumn Header="Excel Attributes"  
                         Binding="{Binding XcelAtt}" 
                         Width="0.5*" />
-                    <DataGridTemplateColumn  Header="Variable Attributes" x:Name="xcelAttributes">
+                    <DataGridTemplateColumn  Header="SQL Attributes" x:Name="xcelAttributes">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox Name="cbAttributes" SelectedItem="{Binding SelectedItem, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding SQLAtt,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+                                <ComboBox ItemsSource="{Binding NewSQLAtt,RelativeSource={RelativeSource AncestorType=Window}}"
+                                          DisplayMemberPath="modelatt"
+                                          SelectedValuePath="modelatt"
+                                          SelectedItem="{Binding SelectedItem, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                       />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

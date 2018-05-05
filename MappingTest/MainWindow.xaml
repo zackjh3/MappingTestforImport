@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MappingTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="1000" Loaded="MappingWindowLoaded">
+        Title="MainWindow" Height="500" Width="1000" Loaded="MappingWindowLoaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="271.861"/>
@@ -43,6 +43,7 @@
                     </GroupBox>
                     <Button Content="Next" x:Name="CompMapping" Height="25" Width="50" Click="CompMapping_Click"/>
                     <Button Content="Import" x:Name="Import" Height="25" Width="50" Margin="20" Click="Import_Click"/>
+                    <Button Content="Auto Map" x:Name="AutoMap" Height="25" Width="50" Margin="20" Click="AutoMap_Click"/>
                 </StackPanel>
             </Grid>
         </GroupBox>
@@ -59,10 +60,12 @@
                 <DataGridTemplateColumn  Header="Excel Source Field">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ComboBox  SelectedItem="{Binding SelectedItem, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                                ItemsSource="{Binding ExcelVar,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
-                              
-                                    />
+                            <ComboBox ItemsSource="{Binding ExcelVar,RelativeSource={RelativeSource AncestorType=Window}}" 
+                                      DisplayMemberPath="XcelVar"
+                                      SelectedValuePath="XcelVar"
+                                      SelectedValue="{Binding SelectedItem, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                       
+                                        />
 
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

@@ -76,6 +76,7 @@
     </Compile>
     <Compile Include="Excel Classes\ExcelVariables.cs" />
     <Compile Include="Other Classes\AttMapList.cs" />
+    <Compile Include="Other Classes\AttributeMapping.cs" />
     <Compile Include="Other Classes\CompIndex.cs" />
     <Compile Include="Other Classes\Component.cs" />
     <Compile Include="Other Classes\ComponentMappingClass.cs" />
@@ -83,7 +84,9 @@
     <Compile Include="Other Classes\InputModelColumns.cs" />
     <Compile Include="Other Classes\InputModels.cs" />
     <Compile Include="Other Classes\MappingAttribute.cs" />
+    <Compile Include="Other Classes\ModelAtt.cs" />
     <Compile Include="Other Classes\MyGlobalClass.cs" />
+    <Compile Include="Other Classes\MyModel.cs" />
     <Compile Include="Other Classes\Reference.cs" />
     <Compile Include="RIPL Classes\RIPLComps.cs" />
     <Compile Include="Other Classes\SelectedInputModels.cs" />

@@ -45,12 +45,16 @@ namespace MappingTest
         public static string SelReference = "";
         public static string ExcelMappedVar = "";
         public static string RIPLMappedVar = "";
+        public static List<MyModel> MyDataGridItems { get; set; }
+        public static DataTable myAtts { get; set; }
+
         public List<RIPLVariables> VarDataGridItems { get; set; }
         public ObservableCollection<ExcelVariables> ExcelVar { get; set; }
         public static Excel.Worksheet excelSheet { get; set; }
         public ObservableCollection<string> Types { get; set; }
         public ObservableCollection<InputModelColumns> InputModelCol { get; set; }
         public static ObservableCollection<SourceColumns> SourceCol { get; set; }
+        public List<ModelAtt> AutoMapSQLAtt { get; set; }
         public static string selectedFile = "C:\\Users\\zach.hine\\American Innovations\\Import\\TestData.xlsx";
         private string transform = string.Empty;
         public List<Reference> newref { get; set; }
@@ -265,7 +269,6 @@ namespace MappingTest
         }
         public void cbSourceSheet_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             var SourceSheet = sender as ComboBox;
             selectedSheet = SourceSheet.SelectedItem as string;
             
@@ -479,6 +482,7 @@ namespace MappingTest
                         }
                         connection.Close();
                         MessageBox.Show("Import Complete");
+                       
                     }
                 }
 
@@ -506,16 +510,28 @@ namespace MappingTest
                     using (SqlCommand cmd = connection.CreateCommand())
                     {
                         connection.Open();
+                       
                         string cmdtext = String.Format("DELETE FROM dbo.{0} WHERE Component IN ({1})", Mtbl, complist);
                         cmd.CommandText = cmdtext;
                         cmd.ExecuteNonQuery();
+                        string collcmd = String.Format("SELECT MAX(Collector_ID) FROM {0}", Mtbl);
+                        cmd.CommandText = collcmd;
+                        int maxID = Convert.ToInt32(cmd.ExecuteScalar());
                         string cmdtext2 = String.Format("INSERT INTO dbo.{0} (Component,{1}) SELECT Component,{1} FROM [AImportTempTable] " +
                             "WHERE Component IS NOT NULL ", Mtbl, varlist);
                         cmd.CommandText = cmdtext2;
                         cmd.ExecuteNonQuery();
-                        string cmdtext3 = String.Format("INSERT INTO dbo.{0} ({1}) SELECT {1} FROM [AImportTempTable] " +
-                            "WHERE Component IS NOT NULL ", Rtble, statlist);
+                        string cmdtext5 = String.Format("ALTER TABLE AImportTempTable ADD Ident INT Identity(1,1), Collector_ID INT");
+                        cmd.CommandText = cmdtext5;
+                        cmd.ExecuteNonQuery();
+                        string cmdtext3 = String.Format("DECLARE @Increment INT;" +
+                            "SELECT @Increment = (SELECT MIN(Collector_ID) FROM {0} WHERE Collector_ID > {1});" +
+                            " UPDATE AImportTempTable SET Collector_ID = Ident + @Increment - 1", Mtbl, maxID);
                         cmd.CommandText = cmdtext3;
+                        cmd.ExecuteNonQuery();
+                        string cmdtext4 = String.Format("INSERT INTO dbo.{0} (Collector_ID,{1}) SELECT Collector_ID, {1} FROM [AImportTempTable] " +
+                            "WHERE Component IS NOT NULL ", Rtble, statlist);
+                        cmd.CommandText = cmdtext4;
                         cmd.ExecuteNonQuery();
                         connection.Close();
                     }
@@ -817,6 +833,48 @@ namespace MappingTest
             }
             
         }
+
+        private void AutoMap_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (RIPLVariables riplvar in VarMapping.Items)
+            {
+                string z = riplvar.VarName;
+                ExcelVariables dropdown = ExcelVar.FirstOrDefault(x => x.XcelVar == z);
+                if (dropdown != null)
+                {
+                    riplvar.SelectedItem = dropdown.XcelVar;
+
+                    string y = Convert.ToString(dropdown.XcelVar);
+                    AutoMapSQLAtt = new List<ModelAtt>();
+                    AutoMapSQLAtt = ModelAtt.GetAttributes(y);
+                    DataTable zac = new DataTable();
+                    zac =  AttributeMapping.DemoDistinct(y);
+                    if (AutoMapSQLAtt.Count != 0)
+                    {
+                        
+                        MyDataGridItems = new List<MyModel>();
+                     
+                        foreach (DataRow item in zac.Rows)
+                        {
+                            MyDataGridItems.Add(new MyModel() { XcelAtt = item[0].ToString() });
+                        }
+                        
+                      
+                        foreach (MyModel att in MyDataGridItems)
+                        {
+                            string xcelatt = att.XcelAtt;
+                            ModelAtt attdropdown = AutoMapSQLAtt.FirstOrDefault(m => m.modelatt == xcelatt);
+                            if (attdropdown != null)
+                            {
+                                att.SelectedItem = attdropdown.modelatt;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
     }
 }
     
